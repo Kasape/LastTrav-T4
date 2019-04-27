@@ -114,7 +114,21 @@ class Village {
 
 		}else{
 		$this->production['crop'] = $this->getCropProd()-$this->pop-$upkeep;
-	}
+		}
+
+		$heroData = $database->getHeroData($database->getVillageField($this->wid, 'owner'));
+		if($heroData['dead']==0 && $database->getHUnit($this->wid)){
+            $hwood = $heroData['r1'];
+            $hclay = $heroData['r2'];
+            $hiron = $heroData['r3'];
+            $hcrop = $heroData['r4'];
+            $hAllProd = $heroData['r0'];
+            $hproduct = $heroData['product'];
+            $this->production['wood'] += $hproduct*($hwood*10+$hAllProd*3)*SPEED;
+            $this->production['clay'] += $hproduct*($hclay*10+$hAllProd*3)*SPEED;
+            $this->production['iron'] += $hproduct*($hiron*10+$hAllProd*3)*SPEED;
+            $this->production['crop'] += $hproduct*($hcrop*10+$hAllProd*3)*SPEED;
+        }
 	}
 
 

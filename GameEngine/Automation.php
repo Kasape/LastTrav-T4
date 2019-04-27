@@ -3235,7 +3235,8 @@ $info_cata=" damaged from level <b>".$tblevel."</b> to level <b>".$totallvl."</b
 				}
 				$health = round((3.007 / ((100+$tp*$getHero['power'])+$hero['itempower'])) * $sgh);
 				
-				if($helmet['proc'] == 1 && $helmet['type'] <= 3) $exp += $exp * (10 + $helmet['type'] * 5) / 100;
+				if($helmet['proc'] == 1 && $helmet['type'] <= 3) 
+                    $exp += $exp * (10 + $helmet['type'] * 5) / 100;
 				$database->modifyHero2('experience', $exp, $ownerID, 1);
 				$database->setMovementProc($data['moveid']);
 				$database->editTableField('adventure', 'end', 1, 'wref', $data['to']);
@@ -3559,32 +3560,37 @@ $info_cata=" damaged from level <b>".$tblevel."</b> to level <b>".$totallvl."</b
         $upkeep = $this->getUpkeep($this->getAllUnits($bountywid),0);
 		$q = "SELECT * FROM ".TB_PREFIX."hero where uid = $session->uid";
         $heroData = $database->query_return($q);
-		
-		if($heroData['dead']==0 && $village->capital){
-			$hwood = $heroData['r1'];
-			$hclay = $heroData['r2'];
-			$hiron = $heroData['r3'];
-			$hcrop = $heroData['r4'];
-			$hproduct = $heroData['r0'];
-		}
-		
-        $this->bountyproduction['wood'] = $this->bountyGetWoodProd()+$hwood+$hproduct;
-		$this->bountyproduction['clay'] = $this->bountyGetClayProd()+$hclay+$hproduct;
-		$this->bountyproduction['iron'] = $this->bountyGetIronProd()+$hiron+$hproduct;
+
+        $this->bountyproduction['wood'] = $this->bountyGetWoodProd();
+		$this->bountyproduction['clay'] = $this->bountyGetClayProd();
+		$this->bountyproduction['iron'] = $this->bountyGetIronProd();
 				
         if ($uniqueA['size']==3 && $uniqueA['owner']==$uid){
-        $this->bountyproduction['crop'] = $this->bountyGetCropProd()-$this->bountypop-(($upkeep)-round($upkeep*0.50))+$hcrop+$hproduct;  
+        $this->bountyproduction['crop'] = $this->bountyGetCropProd()-$this->bountypop-(($upkeep)-round($upkeep*0.50));  
         
         }else if ($normalA['type']==4 && $normalA['size']==1 && $normalA['owner']==$uid){
-        $this->bountyproduction['crop'] = $this->bountyGetCropProd()-$this->bountypop-(($upkeep)-round($upkeep*0.25))+$hcrop+$hproduct;
+        $this->bountyproduction['crop'] = $this->bountyGetCropProd()-$this->bountypop-(($upkeep)-round($upkeep*0.25));
         
         }else if ($largeA['size']==2 && $largeA['owner']==$uid){
-         $this->bountyproduction['crop'] = $this->bountyGetCropProd()-$this->bountypop-(($upkeep)-round($upkeep*0.25))+$hcrop+$hproduct;   
+         $this->bountyproduction['crop'] = $this->bountyGetCropProd()-$this->bountypop-(($upkeep)-round($upkeep*0.25));   
        
         }else{
-        $this->bountyproduction['crop'] = $this->bountyGetCropProd()-$this->bountypop-$upkeep+$hcrop+$hproduct;   
-    }
+        $this->bountyproduction['crop'] = $this->bountyGetCropProd()-$this->bountypop-$upkeep;   
         }
+        
+        if($heroData['dead']==0 && $database->getHUnit($village->wid)){
+            $hwood = $heroData['r1'];
+            $hclay = $heroData['r2'];
+            $hiron = $heroData['r3'];
+            $hcrop = $heroData['r4'];
+            $hAllProd = $heroData['r0'];
+            $hproduct = $heroData['product'];
+            $this->bountyproduction['wood'] += $hproduct*($hwood*10+$hAllProd*3)*SPEED;
+            $this->bountyproduction['clay'] += $hproduct*($hclay*10+$hAllProd*3)*SPEED;
+            $this->bountyproduction['iron'] += $hproduct*($hiron*10+$hAllProd*3)*SPEED;
+            $this->bountyproduction['crop'] += $hproduct*($hcrop*10+$hAllProd*3)*SPEED;
+        }
+    }
     
     private function bountyprocessProduction($bountywid) {
         global $database;
